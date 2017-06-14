@@ -22,7 +22,7 @@ class AccountBalanceRetrieverFinal(savingsAccounts: ActorRef, checkingAccounts: 
       val originalSender = sender
 
       context.actorOf(Props(new Actor() {
-        var checkingBalances, savingsBalances, mmBalances: Option[List[(Long, BigDecimal)]] = None
+        var checkingBalances, savingsBalances, mmBalances: Option[BalanceTable] = None
 
         def receive = LoggingReceive {
           case CheckingAccountBalances(balances) =>
@@ -42,7 +42,7 @@ class AccountBalanceRetrieverFinal(savingsAccounts: ActorRef, checkingAccounts: 
         }
 
         def collectBalances = (checkingBalances, savingsBalances, mmBalances) match {
-          case (Some(c), Some(s), Some(m)) =>
+          case (Some(_), Some(_), Some(_)) =>
             log.debug(s"Values received for all three account types")
             timeoutMessager.cancel
             sendResponseAndShutdown(AccountBalances(checkingBalances, savingsBalances, mmBalances))
