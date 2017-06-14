@@ -1,7 +1,6 @@
 package org.jamieallen.effectiveakka.pattern.stuntdouble
 
-import akka.actor.Actor
-import akka.actor.OneForOneStrategy
+import akka.actor.{Actor, OneForOneStrategy}
 import akka.actor.SupervisorStrategy._
 
 case object Start

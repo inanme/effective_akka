@@ -1,15 +1,16 @@
 package org.jamieallen.effectiveakka.common
 
-import akka.actor.{ Actor, ActorLogging }
+import akka.actor.ActorLogging
 import akka.event.LoggingReceive
+import org.jamieallen.effectiveakka.common.Common.{AccountTable, _}
 
 class CheckingAccountsProxyStub extends CheckingAccountsProxy with ActorLogging {
-  val accountData = Map[Long, List[(Long, BigDecimal)]](
+  val accountData: AccountTable = Map(
     1L -> List((3, 15000)),
     2L -> List((6, 640000), (7, 1125000), (8, 40000)))
 
   def receive = LoggingReceive {
-    case GetCustomerAccountBalances(id: Long) =>
+    case GetCustomerAccountBalances(id: CustomerNumber) =>
       log.debug(s"Received GetCustomerAccountBalances for ID: $id")
       accountData.get(id) match {
         case Some(data) => sender ! CheckingAccountBalances(Some(data))
@@ -19,12 +20,12 @@ class CheckingAccountsProxyStub extends CheckingAccountsProxy with ActorLogging 
 }
 
 class SavingsAccountsProxyStub extends SavingsAccountsProxy with ActorLogging {
-  val accountData = Map[Long, List[(Long, BigDecimal)]](
+  val accountData: AccountTable = Map(
     1L -> (List((1, 150000), (2, 29000))),
     2L -> (List((5, 80000))))
 
   def receive = LoggingReceive {
-    case GetCustomerAccountBalances(id: Long) =>
+    case GetCustomerAccountBalances(id: CustomerNumber) =>
       log.debug(s"Received GetCustomerAccountBalances for ID: $id")
       accountData.get(id) match {
         case Some(data) => sender ! SavingsAccountBalances(Some(data))
@@ -34,11 +35,11 @@ class SavingsAccountsProxyStub extends SavingsAccountsProxy with ActorLogging {
 }
 
 class MoneyMarketAccountsProxyStub extends MoneyMarketAccountsProxy with ActorLogging {
-  val accountData = Map[Long, List[(Long, BigDecimal)]](
+  val accountData: AccountTable = Map(
     2L -> List((9, 640000), (10, 1125000), (11, 40000)))
 
   def receive = LoggingReceive {
-    case GetCustomerAccountBalances(id: Long) =>
+    case GetCustomerAccountBalances(id: CustomerNumber) =>
       log.debug(s"Received GetCustomerAccountBalances for ID: $id")
       accountData.get(id) match {
         case Some(data) => sender ! MoneyMarketAccountBalances(Some(data))
@@ -49,7 +50,7 @@ class MoneyMarketAccountsProxyStub extends MoneyMarketAccountsProxy with ActorLo
 
 class TimingOutSavingsAccountProxyStub extends SavingsAccountsProxy with ActorLogging {
   def receive = LoggingReceive {
-    case GetCustomerAccountBalances(id: Long) =>
+    case GetCustomerAccountBalances(id: CustomerNumber) =>
       log.debug(s"Forcing timeout by not responding!")
   }
 }

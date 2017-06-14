@@ -1,12 +1,13 @@
 package org.jamieallen.effectiveakka.pattern.extra
 
-import akka.testkit.{ TestKit, TestProbe, ImplicitSender }
-import akka.actor.{ Actor, ActorLogging, ActorSystem, Props }
-import org.scalatest.WordSpecLike
-import org.scalatest.Matchers
-import scala.concurrent.duration._
+import akka.actor.{ActorSystem, Props}
+import akka.testkit.{ImplicitSender, TestKit, TestProbe}
+import org.jamieallen.effectiveakka.common.Common._
 import org.jamieallen.effectiveakka.common._
 import org.jamieallen.effectiveakka.pattern.extra.AccountBalanceRetrieverFinal._
+import org.scalatest.{Matchers, WordSpecLike}
+
+import scala.concurrent.duration._
 
 class ExtraFinalSpec extends TestKit(ActorSystem("ExtraTestAS")) with ImplicitSender with WordSpecLike with Matchers {
   "An AccountBalanceRetriever" should {

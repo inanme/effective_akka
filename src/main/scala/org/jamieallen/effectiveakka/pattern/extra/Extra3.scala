@@ -1,16 +1,18 @@
 package org.jamieallen.effectiveakka.pattern.extra
 
-import org.jamieallen.effectiveakka.common._
-import akka.actor.{ Actor, ActorRef, Props }
+import akka.actor.{Actor, ActorRef, Props}
+import org.jamieallen.effectiveakka.common.Common._
 
 class AccountBalanceRetriever3(savingsAccounts: ActorRef, checkingAccounts: ActorRef, moneyMarketAccounts: ActorRef) extends Actor {
-  val checkingBalances, savingsBalances, mmBalances: Option[List[(Long, BigDecimal)]] = None
+  val checkingBalances, savingsBalances, mmBalances: Option[BalanceTable] = None
   var originalSender: Option[ActorRef] = None
+
   def receive = {
     case GetCustomerAccountBalances(id) => {
       context.actorOf(Props(new Actor() {
-        var checkingBalances, savingsBalances, mmBalances: Option[List[(Long, BigDecimal)]] = None
+        var checkingBalances, savingsBalances, mmBalances: Option[BalanceTable] = None
         val originalSender = sender
+
         def receive = {
           case CheckingAccountBalances(balances) =>
             checkingBalances = balances

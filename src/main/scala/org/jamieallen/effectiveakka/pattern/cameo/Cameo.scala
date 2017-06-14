@@ -1,31 +1,33 @@
 package org.jamieallen.effectiveakka.pattern.cameo
 
+import akka.actor.{Actor, ActorLogging, ActorRef, Props, actorRef2Scala}
+import akka.event.LoggingReceive
+import org.jamieallen.effectiveakka.common.Common._
+
 import scala.concurrent.duration.DurationInt
 
-import org.jamieallen.effectiveakka.common._
-
-import akka.actor.Actor
-import akka.actor.ActorLogging
-import akka.actor.ActorRef
-import akka.actor.Props
-import akka.actor.actorRef2Scala
-import akka.event.LoggingReceive
-
 object AccountBalanceResponseHandler {
+
   case object AccountRetrievalTimeout
 
-  def props(savingsAccounts: ActorRef, checkingAccounts: ActorRef,
-    moneyMarketAccounts: ActorRef, originalSender: ActorRef): Props = {
+  def props(savingsAccounts: ActorRef,
+            checkingAccounts: ActorRef,
+            moneyMarketAccounts: ActorRef,
+            originalSender: ActorRef): Props = {
     Props(new AccountBalanceResponseHandler(savingsAccounts, checkingAccounts,
       moneyMarketAccounts, originalSender))
   }
 }
 
-class AccountBalanceResponseHandler(savingsAccounts: ActorRef, checkingAccounts: ActorRef,
-  moneyMarketAccounts: ActorRef, originalSender: ActorRef) extends Actor with ActorLogging {
+class AccountBalanceResponseHandler(savingsAccounts: ActorRef,
+                                    checkingAccounts: ActorRef,
+                                    moneyMarketAccounts: ActorRef,
+                                    originalSender: ActorRef) extends Actor with ActorLogging {
 
   import AccountBalanceResponseHandler._
-  var checkingBalances, savingsBalances, mmBalances: Option[List[(Long, BigDecimal)]] = None
+
+  var checkingBalances, savingsBalances, mmBalances: Option[BalanceTable] = None
+
   def receive = LoggingReceive {
     case CheckingAccountBalances(balances) =>
       log.debug(s"Received checking account balances: $balances")
@@ -45,7 +47,7 @@ class AccountBalanceResponseHandler(savingsAccounts: ActorRef, checkingAccounts:
   }
 
   def collectBalances = (checkingBalances, savingsBalances, mmBalances) match {
-    case (Some(c), Some(s), Some(m)) =>
+    case (Some(_), Some(_), Some(_)) =>
       log.debug(s"Values received for all three account types")
       timeoutMessager.cancel
       sendResponseAndShutdown(AccountBalances(checkingBalances, savingsBalances, mmBalances))
@@ -59,8 +61,8 @@ class AccountBalanceResponseHandler(savingsAccounts: ActorRef, checkingAccounts:
   }
 
   import context.dispatcher
-  val timeoutMessager = context.system.scheduler.scheduleOnce(
-    250 milliseconds, self, AccountRetrievalTimeout)
+
+  val timeoutMessager = context.system.scheduler.scheduleOnce(250 milliseconds, self, AccountRetrievalTimeout)
 }
 
 class AccountBalanceRetriever(savingsAccounts: ActorRef, checkingAccounts: ActorRef, moneyMarketAccounts: ActorRef) extends Actor {

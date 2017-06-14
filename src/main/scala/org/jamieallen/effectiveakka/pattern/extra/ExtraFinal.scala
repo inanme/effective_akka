@@ -1,16 +1,19 @@
 package org.jamieallen.effectiveakka.pattern.extra
 
-import scala.concurrent.ExecutionContext
-import scala.concurrent.duration._
-import org.jamieallen.effectiveakka.common._
-import akka.actor.{ Actor, ActorRef, Props, ActorLogging }
+import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import akka.event.LoggingReceive
+import org.jamieallen.effectiveakka.common.Common._
+
+import scala.concurrent.duration._
 
 object AccountBalanceRetrieverFinal {
+
   case object AccountRetrievalTimeout
+
 }
 
 class AccountBalanceRetrieverFinal(savingsAccounts: ActorRef, checkingAccounts: ActorRef, moneyMarketAccounts: ActorRef) extends Actor with ActorLogging {
+
   import AccountBalanceRetrieverFinal._
 
   def receive = LoggingReceive {
@@ -20,6 +23,7 @@ class AccountBalanceRetrieverFinal(savingsAccounts: ActorRef, checkingAccounts: 
 
       context.actorOf(Props(new Actor() {
         var checkingBalances, savingsBalances, mmBalances: Option[List[(Long, BigDecimal)]] = None
+
         def receive = LoggingReceive {
           case CheckingAccountBalances(balances) =>
             log.debug(s"Received checking account balances: $balances")
@@ -56,6 +60,7 @@ class AccountBalanceRetrieverFinal(savingsAccounts: ActorRef, checkingAccounts: 
         moneyMarketAccounts ! GetCustomerAccountBalances(id)
 
         import context.dispatcher
+
         val timeoutMessager = context.system.scheduler.scheduleOnce(250 milliseconds, self, AccountRetrievalTimeout)
       }))
     }

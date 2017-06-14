@@ -1,20 +1,30 @@
 package org.jamieallen.effectiveakka.common
 
-import akka.actor.{ Actor, ActorLogging }
-import akka.event.LoggingReceive
+import akka.actor.Actor
 
-case class GetCustomerAccountBalances(id: Long)
-case class AccountBalances(
-  checking: Option[List[(Long, BigDecimal)]],
-  savings: Option[List[(Long, BigDecimal)]],
-  moneyMarket: Option[List[(Long, BigDecimal)]])
-case class CheckingAccountBalances(
-  balances: Option[List[(Long, BigDecimal)]])
-case class SavingsAccountBalances(
-  balances: Option[List[(Long, BigDecimal)]])
-case class MoneyMarketAccountBalances(
-  balances: Option[List[(Long, BigDecimal)]])
+object Common {
+  type AccountNumber = Long
+  type CustomerNumber = Long
+  type Balance = BigDecimal
+  type BalanceTable = List[(AccountNumber, Balance)]
+  type AccountTable = Map[AccountNumber, BalanceTable]
 
-trait SavingsAccountsProxy extends Actor
-trait CheckingAccountsProxy extends Actor
-trait MoneyMarketAccountsProxy extends Actor
+  case class GetCustomerAccountBalances(id: CustomerNumber)
+
+  case class AccountBalances(checking: Option[BalanceTable],
+                             savings: Option[BalanceTable],
+                             moneyMarket: Option[BalanceTable])
+
+  case class CheckingAccountBalances(balances: Option[BalanceTable])
+
+  case class SavingsAccountBalances(balances: Option[BalanceTable])
+
+  case class MoneyMarketAccountBalances(balances: Option[BalanceTable])
+
+  trait SavingsAccountsProxy extends Actor
+
+  trait CheckingAccountsProxy extends Actor
+
+  trait MoneyMarketAccountsProxy extends Actor
+
+}
