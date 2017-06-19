@@ -10,19 +10,12 @@ object AccountBalanceResponseHandler {
 
   case object AccountRetrievalTimeout
 
-  def props(savingsAccounts: ActorRef,
-            checkingAccounts: ActorRef,
-            moneyMarketAccounts: ActorRef,
-            originalSender: ActorRef): Props = {
-    Props(new AccountBalanceResponseHandler(savingsAccounts, checkingAccounts,
-      moneyMarketAccounts, originalSender))
+  def props(originalSender: ActorRef): Props = {
+    Props(new AccountBalanceResponseHandler(originalSender))
   }
 }
 
-class AccountBalanceResponseHandler(savingsAccounts: ActorRef,
-                                    checkingAccounts: ActorRef,
-                                    moneyMarketAccounts: ActorRef,
-                                    originalSender: ActorRef) extends Actor with ActorLogging {
+class AccountBalanceResponseHandler(originalSender: ActorRef) extends Actor with ActorLogging {
 
   import AccountBalanceResponseHandler._
 
@@ -69,7 +62,7 @@ class AccountBalanceRetriever(savingsAccounts: ActorRef, checkingAccounts: Actor
   def receive = {
     case GetCustomerAccountBalances(id) =>
       val originalSender = sender
-      val handler = context.actorOf(AccountBalanceResponseHandler.props(savingsAccounts, checkingAccounts, moneyMarketAccounts, originalSender), "cameo-message-handler")
+      val handler = context.actorOf(AccountBalanceResponseHandler.props(originalSender), "cameo-message-handler")
       savingsAccounts.tell(GetCustomerAccountBalances(id), handler)
       checkingAccounts.tell(GetCustomerAccountBalances(id), handler)
       moneyMarketAccounts.tell(GetCustomerAccountBalances(id), handler)
